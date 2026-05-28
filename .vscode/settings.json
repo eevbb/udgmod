@@ -1,0 +1,11 @@
+{
+    "files.exclude": {
+        ".gitattributes": true,
+        ".github/**": true,
+        ".gitignore": true,
+        ".vscode/**": true,
+        "COPYING": true,
+        "Cargo.lock": true,
+        "target/**": true,
+    },
+}

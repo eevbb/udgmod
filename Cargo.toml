@@ -1,0 +1,62 @@
+[workspace]
+resolver = "3"
+members = ["proc", "udgmod"]
+
+[workspace.package]
+version = "1.0.0"
+edition = "2024"
+
+[workspace.dependencies]
+eyre = "0.6"
+glam = { version = "0.33", features = ["scalar-math"] }
+log = {
+  version = "0.4",
+  features = [
+    "max_level_trace",
+    "release_max_level_info",
+    "std",
+  ]
+}
+minhook = "0.9"
+parking_lot = "0.12"
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "2.0", default-features = false }
+windows = {
+  version = "0.62",
+  features = [
+    "Win32_Graphics_Direct3D",
+    "Win32_Graphics_Direct3D11",
+    "Win32_Graphics_Dxgi",
+    "Win32_Graphics_Dxgi_Common",
+    "Win32_System_Console",
+    "Win32_System_Diagnostics_Debug",
+    "Win32_System_LibraryLoader",
+    "Win32_System_ProcessStatus",
+    "Win32_System_SystemServices",
+    "Win32_System_Threading",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+  ]
+}
+
+[workspace.lints.clippy]
+cast_precision_loss = { level = "allow", priority = 1 }
+missing_panics_doc = { level = "allow", priority = 1 }
+missing_safety_doc = { level = "allow", priority = 1 }
+redundant_closure_for_method_calls = { level = "allow", priority = 1 }
+struct_field_names = { level = "allow", priority = 1 }
+too_many_lines = { level = "allow", priority = 1 }
+
+all = "warn"
+pedantic = "warn"
+
+[workspace.lints.rust]
+unused_crate_dependencies = "warn"
+unused_extern_crates = "warn"
+unused_import_braces = "warn"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1

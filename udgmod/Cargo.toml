@@ -1,0 +1,20 @@
+[package]
+name = "udgmod"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+name = "d3d11"
+
+[dependencies]
+eyre.workspace = true
+glam.workspace = true
+log.workspace = true
+minhook.workspace = true
+parking_lot.workspace = true
+proc = { path = "../proc" }
+windows.workspace = true
+
+[lints]
+workspace = true

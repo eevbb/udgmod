@@ -1,0 +1,11 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(Windows) Attach",
+            "type": "cppvsdbg",
+            "request": "attach",
+            "program": "${env:STEAM_DIR}/steamapps/common/Danganronpa Another Episode Ultra Despair Girls/game.exe",
+        },
+    ]
+}
