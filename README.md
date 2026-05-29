@@ -30,6 +30,10 @@
 
 * Disables exclusive fullscreen mode in favor of borderless fullscreen (`Alt + Enter` to toggle)
 
+## Download
+
+[Clicky!](https://github.com/eevbb/udgmod/releases/latest)
+
 ## Installation
 
 Just place the d3d11.dll file right next to the game's executable (game.exe) and start the game.
@@ -75,7 +79,7 @@ This is more of a hack than Komaru since Toko isn't actually ever meant to lose 
 
 ## Uninstalling
 
-Simply delete the d3d11.dll file! And may want to delete the udgmod.log file as well.
+Simply delete the d3d11.dll file! And you may want to delete the udgmod.log file as well.
 
 ## Building
 
