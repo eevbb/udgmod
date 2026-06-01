@@ -1,3 +1,4 @@
+mod assets;
 mod borderless_toggle;
 mod common;
 mod fix_screensize;
@@ -37,6 +38,7 @@ pub fn init(mut register_update: impl FnMut(fn())) {
             game_addr,
             register_update,
             [
+                assets,
                 borderless_toggle,
                 common,
                 fix_screensize,
