@@ -16,16 +16,16 @@ use crate::{
 };
 
 init!([
-    IS_EXCLUSIVE_FULLSCREEN<u8>(0x0080_6064);
-    WINDOW_MODE<WindowMode>(0x0082_a90c);
-    WINDOW_SIZE<WindowSize>(0x0082_a8fa);
-    SYS_SCREEN_WIDTH<i16>(0x0082_a90e);
-    SYS_SCREEN_HEIGHT<i16>(0x0082_a910);
-    WINDOW_RECT<RECT>(0x0080_6038);
-    GET_HWND<fn() -> HWND>(0x0011_33e0);
-    UPDATE_FULLSCREEN<fn(u8)>(0x0010_fe10);
-    SET_WINDOW_TITLE<fn(PSTR)>(0x0011_3900) => set_window_title;
-    SET_FULLSCREEN<fn(u8)>(0x0010_fcb0) => set_fullscreen;
+    IS_EXCLUSIVE_FULLSCREEN<u8>(0x0080_6064, 0x0080_4f84);
+    WINDOW_MODE<WindowMode>(0x0082_a90c, 0x0082_982c);
+    WINDOW_SIZE<WindowSize>(0x0082_a8fa, 0x0082_981a);
+    SYS_SCREEN_WIDTH<i16>(0x0082_a90e, 0x0082_982e);
+    SYS_SCREEN_HEIGHT<i16>(0x0082_a910, 0x0082_9830);
+    WINDOW_RECT<RECT>(0x0080_6038, 0x0080_4f58);
+    GET_HWND<fn() -> HWND>(0x0011_33e0, 0x0011_2e50);
+    UPDATE_FULLSCREEN<fn(u8)>(0x0010_fe10, 0x0010_fa10);
+    SET_WINDOW_TITLE<fn(PSTR)>(0x0011_3900, 0x0011_3510) => set_window_title;
+    SET_FULLSCREEN<fn(u8)>(0x0010_fcb0, 0x0010_f8b0) => set_fullscreen;
 ]);
 
 extern "C" fn set_window_title(title: PSTR) {

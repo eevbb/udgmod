@@ -7,9 +7,26 @@ use windows::Win32::{
     System::Diagnostics::Debug::{ReadProcessMemory, WriteProcessMemory},
 };
 
+use crate::util::GameVersion;
+
+#[derive(Clone, Copy)]
+pub struct Offset {
+    pub en: usize,
+    pub jp: usize,
+}
+
+impl Offset {
+    pub const fn get(self, version: GameVersion) -> usize {
+        match version {
+            GameVersion::En => self.en,
+            GameVersion::Jp => self.jp,
+        }
+    }
+}
+
 pub struct Var<T> {
     name: &'static str,
-    addr: usize,
+    offset: Offset,
     ptr: *mut T,
 }
 
@@ -17,19 +34,19 @@ unsafe impl<T> Send for Var<T> {}
 unsafe impl<T> Sync for Var<T> {}
 
 impl<T> Var<T> {
-    pub const fn new(name: &'static str, addr: usize) -> Self {
+    pub const fn new(name: &'static str, offset: Offset) -> Self {
         Self {
             name,
-            addr,
+            offset,
             ptr: ptr::null_mut(),
         }
     }
 
-    pub fn load(&mut self, base_addr: usize) -> Result<()> {
+    pub fn load(&mut self, base_addr: usize, version: GameVersion) -> Result<()> {
         if base_addr == 0 {
             bail!("Base address is null");
         }
-        let address = base_addr + self.addr;
+        let address = base_addr + self.offset.get(version);
         self.ptr = address as *mut T;
         log::info!("{} address: 0x{address:X}", self.name);
         Ok(())
@@ -47,6 +64,8 @@ impl<T> Var<T> {
 pub struct Patch<const N: usize> {
     var: Var<c_void>,
     handle: HANDLE,
+    bytes_en: [u8; N],
+    bytes_jp: [u8; N],
     bytes: [u8; N],
 }
 
@@ -57,17 +76,28 @@ unsafe impl<const N: usize> Send for Patch<N> {}
 // now.
 #[expect(dead_code)]
 impl<const N: usize> Patch<N> {
-    pub const fn new(name: &'static str, addr: usize, bytes: [u8; N]) -> Self {
+    pub const fn new(
+        name: &'static str,
+        offset: Offset,
+        bytes_en: [u8; N],
+        bytes_jp: [u8; N],
+    ) -> Self {
         Self {
-            var: Var::new(name, addr),
+            var: Var::new(name, offset),
             handle: HANDLE(ptr::null_mut()),
-            bytes,
+            bytes_en,
+            bytes_jp,
+            bytes: bytes_en,
         }
     }
 
-    pub fn load(&mut self, handle: HANDLE, base_addr: usize) -> Result<()> {
-        self.var.load(base_addr)?;
+    pub fn load(&mut self, handle: HANDLE, base_addr: usize, version: GameVersion) -> Result<()> {
+        self.var.load(base_addr, version)?;
         self.handle = handle;
+        self.bytes = match version {
+            GameVersion::En => self.bytes_en,
+            GameVersion::Jp => self.bytes_jp,
+        };
         let mut buffer = [0u8; N];
         unsafe {
             ReadProcessMemory(
@@ -122,15 +152,15 @@ unsafe impl<T> Sync for Func<T> {}
 unsafe impl<T> Send for Func<T> {}
 
 impl<T> Func<T> {
-    pub const fn new(name: &'static str, addr: usize) -> Self {
+    pub const fn new(name: &'static str, offset: Offset) -> Self {
         Self {
-            var: Var::new(name, addr),
+            var: Var::new(name, offset),
             _marker: PhantomData,
         }
     }
 
-    pub fn load(&mut self, base_addr: usize) -> Result<()> {
-        self.var.load(base_addr)
+    pub fn load(&mut self, base_addr: usize, version: GameVersion) -> Result<()> {
+        self.var.load(base_addr, version)
     }
 
     pub fn func(&self) -> Option<T> {
@@ -149,16 +179,16 @@ unsafe impl<T> Sync for FuncHook<T> {}
 unsafe impl<T> Send for FuncHook<T> {}
 
 impl<T: Copy> FuncHook<T> {
-    pub const fn new(name: &'static str, addr: usize, hook: T) -> Self {
+    pub const fn new(name: &'static str, offset: Offset, hook: T) -> Self {
         Self {
-            func: Func::<T>::new(name, addr),
+            func: Func::<T>::new(name, offset),
             hook,
             trampoline: None,
         }
     }
 
-    pub fn load(&mut self, base_addr: usize) -> Result<()> {
-        self.func.load(base_addr)?;
+    pub fn load(&mut self, base_addr: usize, version: GameVersion) -> Result<()> {
+        self.func.load(base_addr, version)?;
 
         if self.trampoline.is_some() {
             bail!("Function {} is already hooked", self.func.var.name);

@@ -10,7 +10,7 @@ use crate::{
 };
 
 init!([
-    WND_PROC<fn(HWND, u32, WPARAM, LPARAM) -> LRESULT>(0x0011_4e60) => wnd_proc;
+    WND_PROC<fn(HWND, u32, WPARAM, LPARAM) -> LRESULT>(0x0011_4e60, 0x0011_4a70) => wnd_proc;
 ]);
 
 extern "C" fn wnd_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {

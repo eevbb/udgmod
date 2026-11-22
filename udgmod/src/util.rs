@@ -43,6 +43,35 @@ pub fn is_key_pressed(vk_code: VIRTUAL_KEY) -> bool {
     unsafe { GetAsyncKeyState(i32::from(vk_code.0)) & 1 != 0 }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum GameVersion {
+    /// `BUILD_170706_202743_0944`
+    En,
+    /// `BUILD_170706_202740_0944`
+    Jp,
+}
+
+const TIMESTAMP_EN: u32 = 0x595e_1eaf;
+const TIMESTAMP_JP: u32 = 0x595e_1eac;
+
+/// Reads the PE header `TimeDateStamp` of the loaded module.
+pub fn get_module_timestamp(base: usize) -> u32 {
+    unsafe {
+        let e_lfanew = *((base + 0x3c) as *const u32) as usize;
+        *((base + e_lfanew + 8) as *const u32)
+    }
+}
+
+pub fn detect_version(base: usize) -> Result<GameVersion> {
+    Ok(match get_module_timestamp(base) {
+        TIMESTAMP_EN => GameVersion::En,
+        TIMESTAMP_JP => GameVersion::Jp,
+        other => {
+            bail!("Unsupported game build (PE timestamp 0x{other:08X})");
+        }
+    })
+}
+
 pub fn get_module_addr(name: PCWSTR) -> Result<usize> {
     let module = unsafe { GetModuleHandleW(name) }?;
 
@@ -79,9 +108,10 @@ macro_rules! init {
         pub fn init(
             handle: ::windows::Win32::Foundation::HANDLE,
             game_addr: usize,
+            version: crate::util::GameVersion,
             mut register_update: impl FnMut(fn())
         ) -> ::eyre::Result<()> {
-            init!(@load (handle, game_addr) [] $($tt)*);
+            init!(@load (handle, game_addr, version) [] $($tt)*);
             $(register_update($update);)?
             $($start();)?
             *IS_ACTIVE.write() = true;
@@ -91,13 +121,13 @@ macro_rules! init {
 
     (@define [$($acc:tt)*]) => { $($acc)* };
 
-    (@load ($handle:expr, $game_addr:expr) [$($acc:tt)*]) => { $($acc)* };
+    (@load ($handle:expr, $game_addr:expr, $version:expr) [$($acc:tt)*]) => { $($acc)* };
 
     // FuncHook
     (
         @define
         [$($acc:tt)*]
-        $ident:ident<fn($($arg:ty),*) $(-> $ret:ty)?>($offset:expr) => $hook:ident;
+        $ident:ident<fn($($arg:ty),*) $(-> $ret:ty)?>($en:expr, $jp:expr) => $hook:ident;
         $($tail:tt)*
     ) => {
         init!(@define
@@ -107,7 +137,7 @@ macro_rules! init {
                     crate::hack::FuncHook<extern "C" fn($($arg),*) $(-> $ret)?>
                 > = ::parking_lot::RwLock::new(crate::hack::FuncHook::new(
                     stringify!($ident),
-                    $offset,
+                    crate::hack::Offset { en: $en, jp: $jp },
                     $hook,
                 ));
             ]
@@ -116,15 +146,15 @@ macro_rules! init {
     };
 
     (
-        @load ($handle:expr, $game_addr:expr)
+        @load ($handle:expr, $game_addr:expr, $version:expr)
         [$($acc:tt)*]
-        $ident:ident<fn($($arg:ty),*) $(-> $ret:ty)?>($offset:expr) => $hook:ident;
+        $ident:ident<fn($($arg:ty),*) $(-> $ret:ty)?>($en:expr, $jp:expr) => $hook:ident;
         $($tail:tt)*
     ) => {
-        init!(@load ($handle, $game_addr)
+        init!(@load ($handle, $game_addr, $version)
             [
                 $($acc)*
-                $ident.write().load($game_addr)?;
+                $ident.write().load($game_addr, $version)?;
             ]
             $($tail)*
         );
@@ -134,7 +164,7 @@ macro_rules! init {
     (
         @define
         [$($acc:tt)*]
-        $ident:ident<fn($($arg:ty),*) $(-> $ret:ty)?>($offset:expr);
+        $ident:ident<fn($($arg:ty),*) $(-> $ret:ty)?>($en:expr, $jp:expr);
         $($tail:tt)*
     ) => {
         init!(@define
@@ -142,22 +172,25 @@ macro_rules! init {
                 $($acc)*
                 static $ident: ::parking_lot::RwLock<
                     crate::hack::Func<extern "C" fn($($arg),*) $(-> $ret)?>
-                > = ::parking_lot::RwLock::new(crate::hack::Func::new(stringify!($ident), $offset));
+                > = ::parking_lot::RwLock::new(crate::hack::Func::new(
+                    stringify!($ident),
+                    crate::hack::Offset { en: $en, jp: $jp },
+                ));
             ]
             $($tail)*
         );
     };
 
     (
-        @load ($handle:expr, $game_addr:expr)
+        @load ($handle:expr, $game_addr:expr, $version:expr)
         [$($acc:tt)*]
-        $ident:ident<fn($($arg:ty),*) $(-> $ret:ty)?>($offset:expr);
+        $ident:ident<fn($($arg:ty),*) $(-> $ret:ty)?>($en:expr, $jp:expr);
         $($tail:tt)*
     ) => {
-        init!(@load ($handle, $game_addr)
+        init!(@load ($handle, $game_addr, $version)
             [
                 $($acc)*
-                $ident.write().load($game_addr)?;
+                $ident.write().load($game_addr, $version)?;
             ]
             $($tail)*
         );
@@ -167,16 +200,19 @@ macro_rules! init {
     (
         @define
         [$($acc:tt)*]
-        $ident:ident($offset:expr) [$($bytes:literal),*];
+        $ident:ident($en:expr, $jp:expr) [$($bytes_en:literal),*] [$($bytes_jp:literal),*];
         $($tail:tt)*
     ) => {
         init!(@define
             [
                 $($acc)*
                 static $ident: ::parking_lot::RwLock<crate::hack::Patch<
-                    { 0 $(+ ($bytes * 0) + 1)* }
+                    { 0 $(+ ($bytes_en * 0) + 1)* }
                 >> = ::parking_lot::RwLock::new(crate::hack::Patch::new(
-                    stringify!($ident), $offset, [$($bytes),*]
+                    stringify!($ident),
+                    crate::hack::Offset { en: $en, jp: $jp },
+                    [$($bytes_en),*],
+                    [$($bytes_jp),*],
                 ));
             ]
             $($tail)*
@@ -184,15 +220,15 @@ macro_rules! init {
     };
 
     (
-        @load ($handle:expr, $game_addr:expr)
+        @load ($handle:expr, $game_addr:expr, $version:expr)
         [$($acc:tt)*]
-        $ident:ident($offset:expr) [$($bytes:literal),*];
+        $ident:ident($en:expr, $jp:expr) [$($bytes_en:literal),*] [$($bytes_jp:literal),*];
         $($tail:tt)*
     ) => {
-        init!(@load ($handle, $game_addr)
+        init!(@load ($handle, $game_addr, $version)
             [
                 $($acc)*
-                $ident.write().load($handle, $game_addr)?;
+                $ident.write().load($handle, $game_addr, $version)?;
             ]
             $($tail)*
         );
@@ -202,29 +238,32 @@ macro_rules! init {
     (
         @define
         [$($acc:tt)*]
-        $ident:ident<$ty:ty>($offset:expr);
+        $ident:ident<$ty:ty>($en:expr, $jp:expr);
         $($tail:tt)*
     ) => {
         init!(@define
             [
                 $($acc)*
                 static $ident: ::parking_lot::RwLock<crate::hack::Var<$ty>> =
-                    ::parking_lot::RwLock::new(crate::hack::Var::new(stringify!($ident), $offset));
+                    ::parking_lot::RwLock::new(crate::hack::Var::new(
+                        stringify!($ident),
+                        crate::hack::Offset { en: $en, jp: $jp },
+                    ));
             ]
             $($tail)*
         );
     };
 
     (
-        @load ($handle:expr, $game_addr:expr)
+        @load ($handle:expr, $game_addr:expr, $version:expr)
         [$($acc:tt)*]
-        $ident:ident<$ty:ty>($offset:expr);
+        $ident:ident<$ty:ty>($en:expr, $jp:expr);
         $($tail:tt)*
     ) => {
-        init!(@load ($handle, $game_addr)
+        init!(@load ($handle, $game_addr, $version)
             [
                 $($acc)*
-                $ident.write().load($game_addr)?;
+                $ident.write().load($game_addr, $version)?;
             ]
             $($tail)*
         );

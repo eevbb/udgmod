@@ -10,8 +10,8 @@ use crate::{hack::trampoline, util::init};
 
 init!(
     [
-        GET_ASSET_SIZE<fn(*const c_char) -> usize>(0x0010_dda0) => get_asset_size;
-        READ_ASSET<fn(*const c_char, *mut u8, usize) -> usize>(0x0010_da20) => read_asset;
+        GET_ASSET_SIZE<fn(*const c_char) -> usize>(0x0010_dda0, 0x0010_d9a0) => get_asset_size;
+        READ_ASSET<fn(*const c_char, *mut u8, usize) -> usize>(0x0010_da20, 0x0010_d620) => read_asset;
     ]
     start: start;
 );

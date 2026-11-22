@@ -8,7 +8,7 @@ edition = "2024"
 
 [workspace.dependencies]
 eyre = "0.6"
-glam = { version = "0.33", features = ["scalar-math"] }
+glam = { version = "0.34", features = ["scalar-math"] }
 log = {
   version = "0.4",
   features = [
@@ -18,7 +18,7 @@ log = {
   ]
 }
 minhook = "0.9"
-parking_lot = "0.12"
+parking_lot = "0.13"
 proc-macro2 = "1.0"
 quote = "1.0"
 syn = { version = "2.0", default-features = false }

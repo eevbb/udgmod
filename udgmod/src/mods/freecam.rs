@@ -15,16 +15,16 @@ use crate::{
 
 init!(
     [
-        GAME_UNFOCUS<u8>(0x0080_2be7);
-        CURSOR_POS<IVec2>(0x0083_40f4);
-        SCREEN_SIZE<IVec2>(0x0083_3d1c);
-        CAM_DATA<CamData>(0x0080_2cb0);
-        RESET_CURSOR_POS<fn()>(0x0011_6f90);
-        GET_PCHR<fn(PchrKind, bool) -> *mut PchrData>(0x000b_49c0);
-        PREPARE_RENDER<fn(*mut RenderObj)>(0x0011_8910) => prepare_render;
-        CAM_UPDATE<fn()>(0x0012_4b20) => cam_update;
-        RENDER_UI<fn(*mut c_void)>(0x0011_e2d0) => render_ui;
-        RENDER_DIALOGUE<fn(*mut c_void)>(0x0011_e100) => render_dialogue;
+        GAME_UNFOCUS<u8>(0x0080_2be7, 0x0080_1b07);
+        CURSOR_POS<IVec2>(0x0083_40f4, 0x0083_3014);
+        SCREEN_SIZE<IVec2>(0x0083_3d1c, 0x0083_2c3c);
+        CAM_DATA<CamData>(0x0080_2cb0, 0x0080_1bd0);
+        RESET_CURSOR_POS<fn()>(0x0011_6f90, 0x0011_6bd0);
+        GET_PCHR<fn(PchrKind, bool) -> *mut PchrData>(0x000b_49c0, 0x000b_48c0);
+        PREPARE_RENDER<fn(*mut RenderObj)>(0x0011_8910, 0x0011_8550) => prepare_render;
+        CAM_UPDATE<fn()>(0x0012_4b20, 0x0012_4760) => cam_update;
+        RENDER_UI<fn(*mut c_void)>(0x0011_e2d0, 0x0011_df10) => render_ui;
+        RENDER_DIALOGUE<fn(*mut c_void)>(0x0011_e100, 0x0011_dd40) => render_dialogue;
     ]
     update: update;
 );

@@ -10,9 +10,9 @@ use crate::{
 };
 
 init!([
-    SCREEN_SIZE<IVec2>(0x083_3d1c);
-    GET_HWND<fn() -> HWND>(0x0011_33e0);
-    SET_SCREEN_SIZE<fn(u32, u32)>(0x0010_fa90) => set_screen_size;
+    SCREEN_SIZE<IVec2>(0x0083_3d1c, 0x0083_2c3c);
+    GET_HWND<fn() -> HWND>(0x0011_33e0, 0x0011_2e50);
+    SET_SCREEN_SIZE<fn(u32, u32)>(0x0010_fa90, 0x0010_f690) => set_screen_size;
 ]);
 
 extern "C" fn set_screen_size(width: u32, height: u32) {

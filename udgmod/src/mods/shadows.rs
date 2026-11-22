@@ -6,9 +6,9 @@ use crate::{
 };
 
 init!([
-    SHADOW_TEXTURE_SIZE<u32>(0x0030_a5d8);
-    SHADOW_TEXTURE_SETUP<fn() -> HRESULT>(0x0011_0a20) => shadow_texture_setup;
-    SHADOW_SETUP<fn(f32, f32, f32, f32)>(0x0012_6a60) => shadow_setup;
+    SHADOW_TEXTURE_SIZE<u32>(0x0030_a5d8, 0x0030_94f8);
+    SHADOW_TEXTURE_SETUP<fn() -> HRESULT>(0x0011_0a20, 0x0011_0620) => shadow_texture_setup;
+    SHADOW_SETUP<fn(f32, f32, f32, f32)>(0x0012_6a60, 0x0012_66a0) => shadow_setup;
 ]);
 
 const FACTOR: u32 = 2_u32.pow(2);

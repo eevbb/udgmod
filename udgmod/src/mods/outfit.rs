@@ -14,15 +14,15 @@ use crate::{
 
 init!(
     [
-        OUTFIT_TO_LOAD<i16>(0x0031_7d90);
-        MAIN_ACTOR<*mut Actor>(0x007e_bc08);
-        OUTFIT_HEALTH<i16>(0x007b_93c0);
-        LOAD_OUTFIT<fn(u8)>(0x0005_77d0);
-        PRELOAD_PCHR_KIND<fn(PchrKind) -> *const c_void>(0x000b_5310);
-        PRELOAD<fn(i16, u8, u8) -> *const c_void>(0x0002_3410) => preload;
-        INIT_MAIN_ACTOR<fn(*mut Actor)>(0x0006_00d0) => init_main_actor;
-        CLEAR_DATA<fn(u32) -> u64>(0x0009_8680) => clear_data;
-        LOAD_PCHR<fn(*const c_void, PchrKind) -> *const c_void>(0x000b_9ff0) => load_pchr;
+        OUTFIT_TO_LOAD<i16>(0x0031_7d90, 0x0031_6cb0);
+        MAIN_ACTOR<*mut Actor>(0x007e_bc08, 0x007e_ab28);
+        OUTFIT_HEALTH<i16>(0x007b_93c0, 0x007b_8290);
+        LOAD_OUTFIT<fn(u8)>(0x0005_77d0, 0x0005_77a0);
+        PRELOAD_PCHR_KIND<fn(PchrKind) -> *const c_void>(0x000b_5310, 0x000b_5210);
+        PRELOAD<fn(i16, u8, u8) -> *const c_void>(0x0002_3410, 0x0002_3440) => preload;
+        INIT_MAIN_ACTOR<fn(*mut Actor)>(0x0006_00d0, 0x0006_0060) => init_main_actor;
+        CLEAR_DATA<fn(u32) -> u64>(0x0009_8680, 0x0009_8630) => clear_data;
+        LOAD_PCHR<fn(*const c_void, PchrKind) -> *const c_void>(0x000b_9ff0, 0x000b_9ec0) => load_pchr;
     ]
     update: update;
 );

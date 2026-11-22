@@ -9,12 +9,12 @@ use crate::{
 
 init!(
     [
-        ACTOR_LIST<*mut ActorList>(0x007e_cb10);
-        JOINT_LIST_COUNT<i16>(0x0080_2b78);
-        JOINT_LIST<*mut JointData>(0x0080_2b80);
-        JOINT_IDX_TABLE<*mut i16>(0x0080_2b88);
-        GET_PCHR<fn(PchrKind, bool) -> *mut PchrData>(0x000b_49c0);
-        UPDATE_SKELETON<fn(*mut RenderObj, *mut *mut JointData)>(0x0010_7350) => update_skeleton;
+        ACTOR_LIST<*mut ActorList>(0x007e_cb10, 0x007e_ba30);
+        JOINT_LIST_COUNT<i16>(0x0080_2b78, 0x0080_1a98);
+        JOINT_LIST<*mut JointData>(0x0080_2b80, 0x0080_1aa0);
+        JOINT_IDX_TABLE<*mut i16>(0x0080_2b88, 0x0080_1aa8);
+        GET_PCHR<fn(PchrKind, bool) -> *mut PchrData>(0x000b_49c0, 0x000b_48c0);
+        UPDATE_SKELETON<fn(*mut RenderObj, *mut *mut JointData)>(0x0010_7350, 0x0010_6f90) => update_skeleton;
     ]
     update: update;
 );

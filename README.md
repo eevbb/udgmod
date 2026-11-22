@@ -38,6 +38,8 @@
 
 Just place the d3d11.dll file right next to the game's executable (game.exe) and start the game.
 
+Both the English and Japanese Steam builds of the game are supported; the version is detected automatically.
+
 ## Usage
 
 ### Outfit Changing
