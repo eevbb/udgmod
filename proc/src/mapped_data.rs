@@ -3,11 +3,10 @@ use std::{collections::BTreeMap, mem};
 use proc_macro2::TokenStream;
 use quote::{ToTokens, format_ident, quote};
 use syn::{
-    Error, Field, FieldMutability, Fields, FieldsNamed, ItemStruct, LitInt, Result, Visibility,
+    Error, Field, FieldModifiers, Fields, FieldsNamed, ItemStruct, LitInt, Result, Visibility,
     parse_quote, token::Colon,
 };
 
-#[derive(Debug)]
 pub struct Mapped {
     repr: TokenStream,
     item: ItemStruct,
@@ -71,7 +70,8 @@ impl Mapped {
                         ident: Some(format_ident!("_end")),
                         colon_token: Some(Colon::default()),
                         ty: parse_quote!(()),
-                        mutability: FieldMutability::None,
+                        modifiers: FieldModifiers::default(),
+                        default: None,
                     }],
                 ) && let Some(first) = fields.first()
                 {

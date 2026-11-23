@@ -21,7 +21,7 @@ minhook = "0.9"
 parking_lot = "0.13"
 proc-macro2 = "1.0"
 quote = "1.0"
-syn = { version = "2.0", default-features = false }
+syn = { version = "3.0", default-features = false, features = ["full", "parsing", "printing"] }
 walkdir = "2.5"
 windows = {
   version = "0.62",
