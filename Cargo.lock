@@ -120,7 +120,7 @@ checksum = "c938015719552d665fd0553b90d96cd7ff58e83e4c061ca99e6bb78865a72752"
 
 [[package]]
 name = "proc"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -237,7 +237,7 @@ dependencies = [
 
 [[package]]
 name = "udgmod"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "eyre",
  "glam",
